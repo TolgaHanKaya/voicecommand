@@ -1,0 +1,56 @@
+# train_model.py
+"""Train a machine learning model for voice commands.
+
+Loads feature matrix X and labels y from the `dataset` directory, scales the features,
+trains a RandomForestClassifier (can be swapped for an SVC), evaluates on the training
+set, prints accuracy and confusion matrix, and saves the trained model and scaler.
+"""
+
+import os
+import numpy as np
+import joblib
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+# If you prefer SVC, uncomment the following line and comment the RandomForest line
+# from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+def main():
+    # Paths
+    dataset_dir = os.path.join(os.path.dirname(__file__), "dataset")
+    X_path = os.path.join(dataset_dir, "X.npy")
+    y_path = os.path.join(dataset_dir, "y.npy")
+
+    # Load data
+    X = np.load(X_path)
+    y = np.load(y_path)
+    print(f"Loaded X shape: {X.shape}, y shape: {y.shape}")
+
+    # Scale features
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Train model – default is RandomForestClassifier
+    model = RandomForestClassifier(n_estimators=200, random_state=42)
+    # For SVC use the line below instead:
+    # model = SVC(kernel='rbf', C=1.0, gamma='scale')
+    model.fit(X_scaled, y)
+
+    # Evaluate on training data
+    y_pred = model.predict(X_scaled)
+    acc = accuracy_score(y, y_pred)
+    cm = confusion_matrix(y, y_pred)
+    print(f"Training accuracy: {acc:.4f}")
+    print("Confusion Matrix:")
+    print(cm)
+
+    # Save the trained model and scaler
+    model_path = os.path.join(os.path.dirname(__file__), "voice_model.pkl")
+    scaler_path = os.path.join(os.path.dirname(__file__), "scaler.pkl")
+    joblib.dump(model, model_path)
+    joblib.dump(scaler, scaler_path)
+    print(f"Model saved to {model_path}")
+    print(f"Scaler saved to {scaler_path}")
+
+if __name__ == "__main__":
+    main()

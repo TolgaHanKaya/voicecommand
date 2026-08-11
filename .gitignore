@@ -1,0 +1,5 @@
+# Ignore dataset folder
+/dataset/
+
+# Ignore README.md (for now. will add later)
+README_draft.md
