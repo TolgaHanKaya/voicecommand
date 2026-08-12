@@ -28,7 +28,7 @@ scaler = joblib.load(scaler_path)
 
 # Configuration matching extract_features.py
 SR = 16000          # Sampling rate
-DURATION = 1.2      # seconds
+DURATION = 2.0      # seconds
 N_MFCC = 13
 
 def record_audio():

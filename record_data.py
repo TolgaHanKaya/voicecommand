@@ -18,7 +18,7 @@ from scipy.io import wavfile
 
 # Configuration
 SAMPLE_RATE = 16000  # Hz
-DURATION = 1.2        # seconds
+DURATION = 2.0        # seconds
 CHANNELS = 1          # mono
 
 # Paths
