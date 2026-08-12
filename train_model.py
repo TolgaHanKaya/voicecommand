@@ -10,10 +10,9 @@ import os
 import numpy as np
 import joblib
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
-# If you prefer SVC, uncomment the following line and comment the RandomForest line
-# from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
 def main():
     # Paths
@@ -26,23 +25,32 @@ def main():
     y = np.load(y_path)
     print(f"Loaded X shape: {X.shape}, y shape: {y.shape}")
 
-    # Scale features
+    # Stratified train / test split (20% test)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
+
+    # Scale features (fit on training set)
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
-    # Train model – default is RandomForestClassifier
-    model = RandomForestClassifier(n_estimators=200, random_state=42)
-    # For SVC use the line below instead:
-    # model = SVC(kernel='rbf', C=1.0, gamma='scale')
-    model.fit(X_scaled, y)
+    # Train model – SVC
+    model = SVC(kernel='rbf', C=1.0, probability=True,
+                class_weight='balanced', random_state=42)
+    model.fit(X_train_scaled, y_train)
 
-    # Evaluate on training data
-    y_pred = model.predict(X_scaled)
-    acc = accuracy_score(y, y_pred)
-    cm = confusion_matrix(y, y_pred)
-    print(f"Training accuracy: {acc:.4f}")
+    # Evaluate on test data
+    y_pred = model.predict(X_test_scaled)
+    acc = accuracy_score(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred)
+    report = classification_report(y_test, y_pred,
+                                   target_names=["HAYIR", "EVET"], digits=4)
+    print(f"Test accuracy: {acc:.4f}")
     print("Confusion Matrix:")
     print(cm)
+    print("Classification Report:")
+    print(report)
 
     # Save the trained model and scaler
     model_path = os.path.join(os.path.dirname(__file__), "voice_model.pkl")
